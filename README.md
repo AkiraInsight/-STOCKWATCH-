@@ -1,106 +1,52 @@
-STOCKWATCH 📊
+💼 Projet : StockChange
 
-Real-Time Stock Tracker with Sentiment Analysis & Price Prediction
+Suivi et prédiction boursière en temps réel sur les entreprises de l’intelligence artificielle.
 
-🚀 Project Overview
+🧠 Résumé du projet
 
-STOCKWATCH is a real-time financial dashboard built with Streamlit, designed to combine stock market data, social sentiment, and machine learning-based price prediction into one clean interface.
+StockChange est une application interactive développée avec Streamlit, permettant de :
+	•	Suivre en temps réel les cours de bourse des entreprises liées à l’IA,
+	•	Analyser les tendances via l’analyse de sentiment à partir de Twitter, Reddit et Yahoo Finance,
+	•	Visualiser l’évolution des actions et effectuer des prédictions de prix à court terme à l’aide de modèles de machine learning.
 
-Whether you're a retail trader, data scientist, or finance geek, STOCKWATCH provides:
+Ce projet a été conçu dans une logique data produit mêlant veille économique, analyse en temps réel et visualisation intuitive.
 
-Live stock tracking (via Yahoo Finance)
+⚙️ Stack technique
+	•	🐍 Python (pandas, numpy, requests, scikit-learn, yfinance, vaderSentiment, etc.)
+	•	📈 Streamlit pour le dashboard interactif
+	•	🔍 API Twitter, Reddit (PRAW), Yahoo Finance
+	•	🔮 Modèles de machine learning : Linear Regression, Random Forest, etc.
+	•	📊 Visualisation : matplotlib, seaborn, plotly
 
-Sentiment monitoring from Twitter and Reddit
+ 📂 Fonctionnalités
+	•	Sélection d’une ou plusieurs entreprises IA
+	•	Visualisation de la tendance des actions en temps réel
+	•	Indicateurs de sentiment social (positif/neutre/négatif)
+	•	Prédiction simple du prix futur avec modèles ML
+	•	Analyse exploratoire des données boursières
+	•	Interface intuitive pour non-experts
 
-Trend indicators (SMA, EMA, Volume, etc.)
+ 🔥 Pourquoi ce projet ?
 
-Predictive modeling using ML (XGBoost / LSTM)
+Parce que l’IA est au cœur des révolutions technologiques actuelles, il est crucial d’observer comment elle impacte les marchés. Ce projet est né de ma volonté d’explorer les données financières sous l’angle de l’intelligence artificielle et de mettre en application mes compétences en data science, NLP et machine learning.
 
+🧠 Ce que j’ai appris
+	•	Intégration de plusieurs sources de données (financières et sociales)
+	•	Entraînement et évaluation de modèles ML simples
+	•	Construction d’un dashboard user-friendly
+	•	Déploiement rapide d’un produit data fonctionnel
 
-⚖️ Key Features
+ 🚀 Prochaines améliorations
+	•	Déploiement via Streamlit Cloud ou AWS
+	•	Amélioration des modèles de prédiction (XGBoost, LSTM)
+	•	Ajout d’une base de données pour l’historique
+	•	Notation ESG / green score des entreprises IA
 
-📈 Live Stock Data: Real-time price updates from Yahoo Finance using yfinance
+ 👤 Auteur
 
-💬 Sentiment Analysis:
+Tristan, Data Analyst & MLOps en alternance chez DataScientest
 
-Twitter scraping via snscrape
-
-Reddit data via Pushshift API
-
-NLP-based sentiment scoring using VADER
-
-🤖 ML Price Prediction:
-
-Forecast next-day price using XGBoost (v1)
-
-LSTM sequence modeling (v2)
-
-🔄 Interactive Streamlit Dashboard:
-
-Filtering by ticker symbol, time range, sentiment, and more
-
-Visuals: line charts, heatmaps, bar graphs
-
-💪 Tech Stack
-
-Frontend: Streamlit
-
-Data Collection: yfinance, snscrape, Pushshift API (Reddit)
-
-NLP: NLTK, VADER, TextBlob
-
-Modeling: XGBoost, LSTM (TensorFlow)
-
-Visualization: Plotly, Matplotlib, Seaborn
-
-Backend: Python, Pandas, Numpy, Scikit-learn
-
-📆 Roadmap
-
-Phase 1 ✅
-
-
-
-Phase 2 ⏳
-
-
-
-Phase 3 🚧
-
-
-
-Phase 4 🚀
-
-
-
-📊 Example Use Cases
-
-Visualize Tesla ($TSLA) sentiment vs price
-
-Track BTC price trends and predict movements
-
-Detect social buzz before price action
-
-🛠️ Installation
-
-# Clone the repo
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Run the app
-streamlit run app.py
-
-
-✨ Contributions
-
-Pull requests are welcome. For major changes, open an issue first to discuss what you'd like to change.
-
-If you enjoy the project, drop a star ⭐ and share your ideas!
-
-👤 Author
-
-Tristan TansuData Analyst & Future MLops EngineerLinkedIn | Portfolio
-
+Passionné de sport, de tech, de finance et de visualisation de données.
+Je monte aussi une activité freelance en data pour aller plus loin.
 
 
