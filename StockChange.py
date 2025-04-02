@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -487,6 +486,8 @@ elif page == pages[4]:
 
         # 👉 Sauvegarde du modèle et du scaler
         joblib.dump(df, "df.joblib")
+        joblib.dump(model, "model.joblib")
+        joblib.dump(scaler, "scaler.joblib")
         
 
         # Store in session_state
@@ -517,7 +518,8 @@ elif page == pages[5]:
 
     # Charger modèle et scaler depuis joblib
     if os.path.exists("model.joblib") and os.path.exists("scaler.joblib") and os.path.exists("df.joblib"):
-        df = joblib.load("df.joblib")
+        model = joblib.load("model.joblib")
+        scaler = joblib.load("scaler.joblib")
     else:
         st.warning("🚨 Le modèle doit être entraîné depuis la page 'Modélisation / Machine Learning ⚙️'.")
         st.stop()
