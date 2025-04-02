@@ -510,14 +510,15 @@ elif page == pages[4]:
             response = requests.put(url, headers=headers, json=data)
             return response.status_code, response.text
 
-        token = st.secrets["GITHUB_TOKEN"]
+        token = st.secrets.get("GITHUB_TOKEN", None)
         if token:
             github_repo = "AkiraInsight/-STOCKWATCH-"
             upload_to_github("model.joblib", github_repo, "model.joblib", token)
             upload_to_github("scaler.joblib", github_repo, "scaler.joblib", token)
             upload_to_github("df.joblib", github_repo, "df.joblib", token)
+            st.success("✅ Modèles exportés sur GitHub.")
         else:
-            st.warning("⚠️ GITHUB_TOKEN non défini. Upload GitHub non effectué.")
+            st.warning("⚠️ Aucun token GitHub détecté. Vérifie que tu as bien défini GITHUB_TOKEN dans `.streamlit/secrets.toml`.")
         
 
         # Store in session_state
@@ -618,4 +619,3 @@ elif page == pages[5]:
     last_data["Conseil"] = reco
 
     st.dataframe(last_data[["Company", "Ticker", "Prix Réel", "Prix Prédit", "Conseil"]])
-
