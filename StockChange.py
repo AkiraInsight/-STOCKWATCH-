@@ -484,6 +484,8 @@ elif page == pages[4]:
         model = LinearRegression()
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
+        joblib.dump(model, "model.joblib")
+        joblib.dump(scaler, "scaler.joblib")
 
         # Store in session_state
         st.session_state.update({
@@ -498,8 +500,7 @@ elif page == pages[4]:
         st.write(f"🔹 R²  : {r2_score(y_test, y_pred):.4f}")
     else:
         st.warning("🚨 Cliquez sur le bouton pour lancer l'entraînement du modèle.")
-        joblib.dump(model, "model.joblib")
-        joblib.dump(scaler, "scaler.joblib")
+
 
 elif page == pages[5]:
     st.markdown("## 🎬 Application – Conseils d'achat/vente")
