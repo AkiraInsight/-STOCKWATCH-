@@ -14,6 +14,8 @@ from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 import joblib
 from sklearn.preprocessing import StandardScaler
+import requests
+from io import BytesIO
 
 def get_data_from_yfinance():
     import yfinance as yf
@@ -516,13 +518,24 @@ elif page == pages[5]:
     Cette section vous permet d’obtenir une recommandation (Acheter / Attendre / Vendre) pour chaque entreprise analysée, basée sur la prédiction du modèle.
     """, unsafe_allow_html=True)
 
-    # Charger modèle et scaler depuis joblib
-    if os.path.exists("model.joblib") and os.path.exists("scaler.joblib") and os.path.exists("df.joblib"):
-        model = joblib.load("model.joblib")
-        scaler = joblib.load("scaler.joblib")
-    else:
-        st.warning("🚨 Le modèle doit être entraîné depuis la page 'Modélisation / Machine Learning ⚙️'.")
-        st.stop()
+    # Charger modèle, scaler et df depuis GitHub
+    def load_joblib_from_github(url):
+        response = requests.get(url)
+        if response.status_code == 200:
+            return joblib.load(BytesIO(response.content))
+        else:
+            st.error(f"❌ Échec du chargement depuis GitHub : {url}")
+            st.stop()
+
+    # URLs vers les fichiers joblib sur GitHub
+    model_url = "https://raw.githubusercontent.com/AkiraInsight/-STOCKWATCH-/main/model.joblib"
+    scaler_url = "https://raw.githubusercontent.com/AkiraInsight/-STOCKWATCH-/main/scaler.joblib"
+    df_url = "https://raw.githubusercontent.com/AkiraInsight/-STOCKWATCH-/main/df.joblib"
+
+    # Charger les objets depuis GitHub
+    model = load_joblib_from_github(model_url)
+    scaler = load_joblib_from_github(scaler_url)
+    df = load_joblib_from_github(df_url)
 
     dataset_path = "https://raw.githubusercontent.com/AkiraInsight/-STOCKWATCH-/main/stockchange_ai_1y.csv"
     try:
