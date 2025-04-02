@@ -498,8 +498,8 @@ elif page == pages[4]:
         st.write(f"🔹 R²  : {r2_score(y_test, y_pred):.4f}")
     else:
         st.warning("🚨 Cliquez sur le bouton pour lancer l'entraînement du modèle.")
-joblib.dump(model, "model.joblib")
-joblib.dump(scaler, "scaler.joblib")
+        joblib.dump(model, "model.joblib")
+        joblib.dump(scaler, "scaler.joblib")
 
 elif page == pages[5]:
     st.markdown("## 🎬 Application – Conseils d'achat/vente")
