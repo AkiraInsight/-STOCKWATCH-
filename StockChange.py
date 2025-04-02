@@ -498,6 +498,8 @@ elif page == pages[4]:
         st.write(f"🔹 R²  : {r2_score(y_test, y_pred):.4f}")
     else:
         st.warning("🚨 Cliquez sur le bouton pour lancer l'entraînement du modèle.")
+joblib.dump(model, "model.joblib")
+joblib.dump(scaler, "scaler.joblib")
 
 elif page == pages[5]:
     st.markdown("## 🎬 Application – Conseils d'achat/vente")
@@ -510,75 +512,75 @@ elif page == pages[5]:
     st.markdown("""
     Cette section vous permet d’obtenir une recommandation (Acheter / Attendre / Vendre) pour chaque entreprise analysée, basée sur la prédiction du modèle.
     """, unsafe_allow_html=True)
-    if "model" not in st.session_state or "scaler" not in st.session_state or "df" not in st.session_state:
-        train_model()
-    
-    # Charger le modèle
-    if "model" not in st.session_state:
-        st.warning("🚨 Modèle non trouvé. Veuillez lancer la modélisation avant.")
+
+    # Charger modèle et scaler depuis joblib
+    if os.path.exists("model.joblib") and os.path.exists("scaler.joblib"):
+        model = joblib.load("model.joblib")
+        scaler = joblib.load("scaler.joblib")
+    else:
+        st.warning("🚨 Le modèle doit être entraîné depuis la page 'Modélisation / Machine Learning ⚙️'.")
         st.stop()
-    pipeline = st.session_state.get("model", None)
-    df = st.session_state.get("df", None)
-    scaler = st.session_state.get("scaler", None)
-    
-    # Charger les données
-    df = st.session_state.get("df", None)
-    if df is None:
-        try:
-            dataset_path = "https://raw.githubusercontent.com/AkiraInsight/-STOCKWATCH-/main/stockchange_ai_1y.csv"
-            df = pd.read_csv(dataset_path)
-            df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
-            df.dropna(subset=['Date', 'Close'], inplace=True)
-        except Exception as e:
-            st.error(f"🚨 Erreur lors du chargement du dataset : {e}")
-            st.stop()
-        
-        # Étendre les dates jusqu'à +7 jours pour chaque entreprise
-        last_dates = df.groupby("Company")["Date"].max().reset_index()
-        
-        for _, row in last_dates.iterrows():
-            company = row["Company"]
-            ticker = df[df["Company"] == company]["Ticker"].iloc[0]
-            base_row = df[(df["Company"] == company) & (df["Date"] == row["Date"])].iloc[0]
-            for i in range(1, 8):
-                future_row = base_row.copy()
-                future_row["Date"] = base_row["Date"] + pd.Timedelta(days=i)
-                df = pd.concat([df, pd.DataFrame([future_row])], ignore_index=True)
-        
-        company_options = df["Company"].dropna().unique()
-        selected_company = st.selectbox("Choisissez une entreprise", company_options)
-        
-        available_dates = sorted(df[df["Company"] == selected_company]["Date"].dropna().dt.date.unique())
-        selected_date = st.date_input("Choisissez une date", min_value=min(available_dates), max_value=max(available_dates))
-        
-        # Filtrer les données selon l'entreprise et la date
-        filtered_df = df[(df["Company"] == selected_company) & (df["Date"] == pd.to_datetime(selected_date))]
-    
-        features = ['Open', 'High', 'Low', 'Volume']
-        cat_features = ['Company', 'Ticker']
-        if not filtered_df.empty:
-            X_app = filtered_df[features + cat_features].copy()
-            y_real = filtered_df["Close"]
+
+    dataset_path = "https://raw.githubusercontent.com/AkiraInsight/-STOCKWATCH-/main/stockchange_ai_1y.csv"
+    try:
+        df = pd.read_csv(dataset_path)
+        df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
+        df.dropna(subset=['Date', 'Close'], inplace=True)
+    except Exception as e:
+        st.error(f"🚨 Erreur lors du chargement du dataset : {e}")
+        st.stop()
+
+    # Étendre les dates à +7 jours
+    last_dates = df.groupby("Company")["Date"].max().reset_index()
+    for _, row in last_dates.iterrows():
+        company = row["Company"]
+        ticker = df[df["Company"] == company]["Ticker"].iloc[0]
+        base_row = df[(df["Company"] == company) & (df["Date"] == row["Date"])].iloc[0]
+        for i in range(1, 8):
+            future_row = base_row.copy()
+            future_row["Date"] = base_row["Date"] + pd.Timedelta(days=i)
+            df = pd.concat([df, pd.DataFrame([future_row])], ignore_index=True)
+
+    company_options = df["Company"].dropna().unique()
+    selected_company = st.selectbox("Choisissez une entreprise", company_options)
+
+    available_dates = sorted(df[df["Company"] == selected_company]["Date"].dropna().dt.date.unique())
+    selected_date = st.date_input("Choisissez une date", min_value=min(available_dates), max_value=max(available_dates))
+
+    filtered_df = df[(df["Company"] == selected_company) & (df["Date"] == pd.to_datetime(selected_date))]
+
+    features = ['Open', 'High', 'Low', 'Volume']
+    cat_features = ['Company', 'Ticker']
+
+    if not filtered_df.empty:
+        X_app = filtered_df[features + cat_features].copy()
+        y_real = filtered_df["Close"]
+    else:
+        st.warning("🚨 Aucune donnée disponible pour cette entreprise à cette date.")
+        st.stop()
+
+    # One-hot encoding
+    from sklearn.preprocessing import OneHotEncoder
+    ohe = OneHotEncoder(sparse_output=False, drop='first')
+    X_cat = ohe.fit_transform(X_app[cat_features])
+    ohe_df = pd.DataFrame(X_cat, columns=ohe.get_feature_names_out(cat_features), index=X_app.index)
+
+    X_app_final = pd.concat([X_app[features], ohe_df], axis=1)
+    X_app_scaled = scaler.transform(X_app_final)
+    y_pred = model.predict(X_app_scaled)
+
+    reco = []
+    for real, pred in zip(y_real, y_pred):
+        if pred > real * 1.02:
+            reco.append("🟢 Acheter")
+        elif pred < real * 0.98:
+            reco.append("🔴 Vendre")
         else:
-            st.warning("🚨 Aucune donnée disponible pour cette entreprise à cette date.")
-            st.stop()
-    
-        X_app_scaled = scaler.transform(X_app)
-        y_pred = pipeline.predict(X_app_scaled)
-    
-        reco = []
-        for real, pred in zip(y_real, y_pred):
-            if pred > real * 1.02:
-                reco.append("🟢 Acheter")
-            elif pred < real * 0.98:
-                reco.append("🔴 Vendre")
-            else:
-                reco.append("🟡 Attendre")
-    
-        last_data = filtered_df.copy()
-        last_data["Prix Réel"] = y_real
-        last_data["Prix Prédit"] = y_pred
-        last_data["Conseil"] = reco
-    
-        st.dataframe(last_data[["Company", "Ticker", "Prix Réel", "Prix Prédit", "Conseil"]])
-    
+            reco.append("🟡 Attendre")
+
+    last_data = filtered_df.copy()
+    last_data["Prix Réel"] = y_real
+    last_data["Prix Prédit"] = y_pred
+    last_data["Conseil"] = reco
+
+    st.dataframe(last_data[["Company", "Ticker", "Prix Réel", "Prix Prédit", "Conseil"]])
