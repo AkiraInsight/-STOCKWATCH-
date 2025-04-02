@@ -462,10 +462,12 @@ elif page == pages[4]:
             st.write("✅ Aperçu du DataFrame au moment de l'erreur :")
             st.dataframe(df.head())
             st.stop()
+        # 🚀 Feature engineering obligatoire
+        df['Return'] = df.groupby('Company')['Close'].transform(lambda x: x.pct_change())
         df['Volatility_7'] = df.groupby('Company')['Return'].transform(lambda x: x.rolling(window=7).std())
         df['Momentum_7'] = df.groupby('Company')['Close'].transform(lambda x: x - x.shift(7))
         df.dropna(inplace=True)
-
+        
         features = ['Open', 'High', 'Low', 'Volume', 'Volatility_7', 'Momentum_7']
         X = df[features]
         y = df['Close']
