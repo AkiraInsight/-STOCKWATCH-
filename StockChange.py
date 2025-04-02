@@ -490,6 +490,34 @@ elif page == pages[4]:
         joblib.dump(df, "df.joblib")
         joblib.dump(model, "model.joblib")
         joblib.dump(scaler, "scaler.joblib")
+
+        # ✅ Upload automatique des modèles vers GitHub si token et repo configurés
+        import base64
+
+        def upload_to_github(file_path, repo, path_in_repo, token):
+            with open(file_path, "rb") as f:
+                content = base64.b64encode(f.read()).decode()
+            url = f"https://api.github.com/repos/{repo}/contents/{path_in_repo}"
+            headers = {
+                "Authorization": f"token {token}",
+                "Accept": "application/vnd.github.v3+json"
+            }
+            data = {
+                "message": f"update {path_in_repo}",
+                "content": content,
+                "branch": "main"
+            }
+            response = requests.put(url, headers=headers, json=data)
+            return response.status_code, response.text
+
+        token = st.secrets["GITHUB_TOKEN"]
+        if token:
+            github_repo = "AkiraInsight/-STOCKWATCH-"
+            upload_to_github("model.joblib", github_repo, "model.joblib", token)
+            upload_to_github("scaler.joblib", github_repo, "scaler.joblib", token)
+            upload_to_github("df.joblib", github_repo, "df.joblib", token)
+        else:
+            st.warning("⚠️ GITHUB_TOKEN non défini. Upload GitHub non effectué.")
         
 
         # Store in session_state
@@ -531,13 +559,9 @@ elif page == pages[5]:
         st.warning("🚨 Le modèle n'est pas disponible. Veuillez l'entraîner dans l'onglet 'Modélisation / Machine Learning ⚙️'.")
         st.stop()
 
-    dataset_path = "https://raw.githubusercontent.com/AkiraInsight/-STOCKWATCH-/main/stockchange_ai_1y.csv"
-    try:
-        df = pd.read_csv(dataset_path)
-        df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
-        df.dropna(subset=['Date', 'Close'], inplace=True)
-    except Exception as e:
-        st.error(f"🚨 Erreur lors du chargement du dataset : {e}")
+    # Vérification que le DataFrame n'est pas vide
+    if df.empty:
+        st.error("❌ Le DataFrame est vide. Veuillez réentraîner le modèle pour générer un jeu de données valide.")
         st.stop()
 
     # Étendre les dates à +7 jours
@@ -595,5 +619,3 @@ elif page == pages[5]:
 
     st.dataframe(last_data[["Company", "Ticker", "Prix Réel", "Prix Prédit", "Conseil"]])
 
-
-    st.dataframe(last_data[["Company", "Ticker", "Prix Réel", "Prix Prédit", "Conseil"]])
