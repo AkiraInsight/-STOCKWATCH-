@@ -486,8 +486,6 @@ elif page == pages[4]:
         y_pred = model.predict(X_test)
 
         # 👉 Sauvegarde du modèle et du scaler
-        joblib.dump(model, "model.joblib")
-        joblib.dump(scaler, "scaler.joblib")
         joblib.dump(df, "df.joblib")
         
 
