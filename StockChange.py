@@ -518,26 +518,18 @@ elif page == pages[5]:
     Cette section vous permet d’obtenir une recommandation (Acheter / Attendre / Vendre) pour chaque entreprise analysée, basée sur la prédiction du modèle.
     """, unsafe_allow_html=True)
 
-    # Charger modèle, scaler et df depuis GitHub
-    def load_joblib_from_github(url):
-        try:
-            response = requests.get(url)
-            response.raise_for_status()  # Lève une exception HTTP si le code n'est pas 200
-            return joblib.load(BytesIO(response.content))
-        except Exception as e:
-            st.error(f"❌ Échec du chargement depuis GitHub : {url}")
-            st.error(f"Détail de l'erreur : {e}")
-            st.stop()
-
-    # URLs vers les fichiers joblib sur GitHub
-    model_url = "https://raw.githubusercontent.com/AkiraInsight/-STOCKWATCH-/main/model.joblib"
-    scaler_url = "https://raw.githubusercontent.com/AkiraInsight/-STOCKWATCH-/main/scaler.joblib"
-    df_url = "https://raw.githubusercontent.com/AkiraInsight/-STOCKWATCH-/main/df.joblib"
-
-    # Charger les objets depuis GitHub
-    model = load_joblib_from_github(model_url)
-    scaler = load_joblib_from_github(scaler_url)
-    df = load_joblib_from_github(df_url)
+    # Charger modèle, scaler et df depuis session_state ou fichiers locaux
+    if "model" in st.session_state and "scaler" in st.session_state and "df" in st.session_state:
+        model = st.session_state["model"]
+        scaler = st.session_state["scaler"]
+        df = st.session_state["df"]
+    elif os.path.exists("model.joblib") and os.path.exists("scaler.joblib") and os.path.exists("df.joblib"):
+        model = joblib.load("model.joblib")
+        scaler = joblib.load("scaler.joblib")
+        df = joblib.load("df.joblib")
+    else:
+        st.warning("🚨 Le modèle n'est pas disponible. Veuillez l'entraîner dans l'onglet 'Modélisation / Machine Learning ⚙️'.")
+        st.stop()
 
     dataset_path = "https://raw.githubusercontent.com/AkiraInsight/-STOCKWATCH-/main/stockchange_ai_1y.csv"
     try:
@@ -600,5 +592,8 @@ elif page == pages[5]:
     last_data["Prix Réel"] = y_real
     last_data["Prix Prédit"] = y_pred
     last_data["Conseil"] = reco
+
+    st.dataframe(last_data[["Company", "Ticker", "Prix Réel", "Prix Prédit", "Conseil"]])
+
 
     st.dataframe(last_data[["Company", "Ticker", "Prix Réel", "Prix Prédit", "Conseil"]])
