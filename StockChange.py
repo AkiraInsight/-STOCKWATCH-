@@ -517,8 +517,6 @@ elif page == pages[5]:
 
     # Charger modèle et scaler depuis joblib
     if os.path.exists("model.joblib") and os.path.exists("scaler.joblib") and os.path.exists("df.joblib"):
-        model = joblib.load("model.joblib")
-        scaler = joblib.load("scaler.joblib")
         df = joblib.load("df.joblib")
     else:
         st.warning("🚨 Le modèle doit être entraîné depuis la page 'Modélisation / Machine Learning ⚙️'.")
