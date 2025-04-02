@@ -498,8 +498,7 @@ elif page == pages[4]:
         st.success("✅ Modèle entraîné avec succès !")
         st.write(f"🔹 MSE : {mean_squared_error(y_test, y_pred):.2f}")
         st.write(f"🔹 R²  : {r2_score(y_test, y_pred):.4f}")
-    else:
-        st.warning("🚨 Cliquez sur le bouton pour lancer l'entraînement du modèle.")
+
 
 
 elif page == pages[5]:
