@@ -486,6 +486,8 @@ elif page == pages[4]:
         y_pred = model.predict(X_test)
         joblib.dump(model, "model.joblib")
         joblib.dump(scaler, "scaler.joblib")
+        joblib.dump(df, "df.joblib")
+        
 
         # Store in session_state
         st.session_state.update({
@@ -514,9 +516,10 @@ elif page == pages[5]:
     """, unsafe_allow_html=True)
 
     # Charger modèle et scaler depuis joblib
-    if os.path.exists("model.joblib") and os.path.exists("scaler.joblib"):
+    if os.path.exists("model.joblib") and os.path.exists("scaler.joblib") and os.path.exists("df.joblib"):
         model = joblib.load("model.joblib")
         scaler = joblib.load("scaler.joblib")
+        df = joblib.load("df.joblib")
     else:
         st.warning("🚨 Le modèle doit être entraîné depuis la page 'Modélisation / Machine Learning ⚙️'.")
         st.stop()
