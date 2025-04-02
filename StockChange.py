@@ -520,11 +520,13 @@ elif page == pages[5]:
 
     # Charger modèle, scaler et df depuis GitHub
     def load_joblib_from_github(url):
-        response = requests.get(url)
-        if response.status_code == 200:
+        try:
+            response = requests.get(url)
+            response.raise_for_status()  # Lève une exception HTTP si le code n'est pas 200
             return joblib.load(BytesIO(response.content))
-        else:
+        except Exception as e:
             st.error(f"❌ Échec du chargement depuis GitHub : {url}")
+            st.error(f"Détail de l'erreur : {e}")
             st.stop()
 
     # URLs vers les fichiers joblib sur GitHub
