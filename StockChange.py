@@ -16,6 +16,23 @@ import joblib
 from sklearn.preprocessing import StandardScaler
 import requests
 from io import BytesIO
+import base64
+
+def upload_to_github(file_path, repo, path_in_repo, token):
+    with open(file_path, "rb") as f:
+        content = base64.b64encode(f.read()).decode()
+    url = f"https://api.github.com/repos/{repo}/contents/{path_in_repo}"
+    headers = {
+        "Authorization": f"token {token}",
+        "Accept": "application/vnd.github.v3+json"
+    }
+    data = {
+        "message": f"update {path_in_repo}",
+        "content": content,
+        "branch": "main"
+    }
+    response = requests.put(url, headers=headers, json=data)
+    return response.status_code, response.text
 
 def get_data_from_yfinance():
     import yfinance as yf
@@ -40,6 +57,8 @@ def get_data_from_yfinance():
         try:
             data = yf.download(ticker, start="2025-01-01", end=None, interval="1d", progress=False)
             if not data.empty:
+                if isinstance(data.columns, pd.MultiIndex):
+                    data.columns = data.columns.get_level_values(0)
                 data.reset_index(inplace=True)
                 data["Company"] = name
                 data["Ticker"] = ticker
@@ -56,7 +75,6 @@ def train_model():
 st.sidebar.image("https://raw.githubusercontent.com/AkiraInsight/-STOCKWATCH-/main/Logo%20Akira%20Insight.png", width=150)
 # Sidebar Title & Info
 st.sidebar.title("📊 StockChange")
-st.sidebar.write("📆 Promotion DataScientest - MLOps 2025")
 
 # Navigation
 pages = [
@@ -65,7 +83,7 @@ pages = [
     "Data Viz 📊",
     "Pré-processing 👷‍♂️",
     "Modélisation / Machine Learning ⚙️",
-    "Application 🎬"
+    "Application 📈"
 ]
 page = st.sidebar.radio("Aller vers", pages)
 
@@ -124,6 +142,11 @@ st.markdown(
     }
     a:hover {
         text-decoration: underline;
+    }
+    /* Réduction de la largeur de la sidebar */
+    [data-testid="stSidebar"] {
+        min-width: 300px !important;
+        max-width: 400px !important;
     }
     </style>
     """,
@@ -419,8 +442,8 @@ elif page == pages[4]:
     st.image(intro_image_path, width=800)
 
     if st.button("🔄 Actualiser les données et réentraîner le modèle"):
-        csv_url = "https://raw.githubusercontent.com/AkiraInsight/-STOCKWATCH-/main/stockchange_ai_1y.csv"
-        df_csv = pd.read_csv(csv_url, parse_dates=['Date'])
+        df_csv = get_data_from_yfinance()
+        df_csv['Date'] = pd.to_datetime(df_csv['Date'])
         last_date = df_csv['Date'].max()
 
         tickers = df_csv['Ticker'].unique()
@@ -455,7 +478,7 @@ elif page == pages[4]:
                 extended_rows.append(new_row)
 
         # Fusion et tri
-        df = pd.concat([df] + extended_rows, ignore_index=True)
+        df = pd.concat([df] + [pd.DataFrame([row]) for row in extended_rows], ignore_index=True)
         df["Date"] = pd.to_datetime(df["Date"])
         df.sort_values(by=["Company", "Date"], inplace=True)
         st.markdown("### 🆕 Données récemment récupérées")
@@ -465,8 +488,10 @@ elif page == pages[4]:
             df.columns = [' '.join(col).strip() for col in df.columns]
 
         # Nettoyage des valeurs de Volume si chaîne avec virgules
-        if df["Volume"].dtype == object:
+        if "Volume" in df.columns and df["Volume"].dtype == object:
             df["Volume"] = df["Volume"].str.replace(",", "").astype(float)
+        else:
+            st.warning("⚠️ La colonne 'Volume' est absente ou invalide, vérifie le dataset.")
         st.write("🔍 Shape du DataFrame après mise à jour :", df.shape)
         st.write("🔍 Aperçu des premières lignes :", df.head())
         st.write("🔍 Colonnes disponibles :", df.columns.tolist())
@@ -506,6 +531,7 @@ elif page == pages[4]:
         y_pred = model.predict(X_test)
 
         # 👉 Sauvegarde du modèle et du scaler
+        token = "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"
         joblib.dump(df, "df.joblib")
         joblib.dump(model, "model.joblib")
         joblib.dump(scaler, "scaler.joblib")
@@ -514,23 +540,6 @@ elif page == pages[4]:
         upload_to_github("scaler.joblib", "AkiraInsight/-STOCKWATCH-", "scaler.joblib", token)
 
         # ✅ Upload automatique des modèles vers GitHub si token et repo configurés
-        import base64
-
-        def upload_to_github(file_path, repo, path_in_repo, token):
-            with open(file_path, "rb") as f:
-                content = base64.b64encode(f.read()).decode()
-            url = f"https://api.github.com/repos/{repo}/contents/{path_in_repo}"
-            headers = {
-                "Authorization": f"token {token}",
-                "Accept": "application/vnd.github.v3+json"
-            }
-            data = {
-                "message": f"update {path_in_repo}",
-                "content": content,
-                "branch": "main"
-            }
-            response = requests.put(url, headers=headers, json=data)
-            return response.status_code, response.text
 
         token = "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"
         if token:
@@ -558,7 +567,9 @@ elif page == pages[4]:
 
 
 elif page == pages[5]:
-    st.markdown("## 🎬 Application – Conseils d'achat/vente")
+    st.markdown("## 📈 Application – Conseils d'achat/vente")
+    st.markdown("ℹ️ **Note :** Les prédictions affichées sont réalisées à **J+7**, en se basant sur les données historiques disponibles.")
+    st.markdown("ℹ️ **Note :** Les prédictions affichées sont réalisées à **J+7**, en se basant sur les données historiques disponibles.")
     intro_image_path = "https://raw.githubusercontent.com/AkiraInsight/-STOCKWATCH-/main/Application.jpg"
     st.image(intro_image_path, width=800)
     
@@ -594,7 +605,8 @@ elif page == pages[5]:
             new_data["Company"] = company
             df_updated.append(new_data)
         else:
-            st.warning(f"⚠️ Aucune donnée disponible pour {ticker} entre {last_date.date()} et {today.date()}")
+            pass  # Ne rien faire si aucune nouvelle donnée, évite l'erreur d'indentation
+            # st.warning(f"⚠️ Aucune donnée disponible pour {ticker} entre {last_date.date()} et {today.date()}")
     if df_updated:
         df_new = pd.concat(df_updated, ignore_index=True)
         df = pd.concat([df, df_new], ignore_index=True)
@@ -634,9 +646,6 @@ elif page == pages[5]:
     # Dates réelles du DataFrame
     real_dates = df[df["Company"] == selected_company]["Date"].dropna().dt.date
     real_dates_list = sorted(real_dates.unique(), reverse=True)
-    st.write("✅ Dates réelles récupérées :", real_dates_list)
-    
-    # On étend avec les 7 jours suivants si au moins une date est disponible
     if real_dates_list:
         max_date = real_dates_list[0]
         extended_dates = [max_date + timedelta(days=i) for i in range(1, 8)]
@@ -645,7 +654,6 @@ elif page == pages[5]:
     all_dates = sorted(set(real_dates_list + extended_dates), reverse=True)
     
     available_dates = all_dates
-    st.write("📆 Dates disponibles pour", selected_company, ":", [str(d) for d in sorted(set(real_dates_list + extended_dates), reverse=True)])
     selected_date = st.selectbox("📆 Choisissez une date", options=[str(d) for d in available_dates])
     
     df["Date"] = pd.to_datetime(df["Date"])
@@ -704,4 +712,3 @@ elif page == pages[5]:
     last_data["Conseil"] = reco
 
     st.dataframe(last_data[["Company", "Ticker", "Prix Réel", "Prix Prédit", "Conseil"]])
-
