@@ -53,7 +53,7 @@ def train_model():
 
 # --- STYLE & SIDEBAR ---
 
-st.sidebar.image("Logo Akira Insight.png", width=150)
+st.sidebar.image("https://raw.githubusercontent.com/AkiraInsight/-STOCKWATCH-/main/Logo%20Akira%20Insight.png", width=150)
 # Sidebar Title & Info
 st.sidebar.title("📊 StockChange")
 st.sidebar.write("📆 Promotion DataScientest - MLOps 2025")
@@ -132,11 +132,8 @@ st.markdown(
 
 if page == pages[0]:
     st.markdown("## 🎯 Introduction – StockChange")
-    intro_image_path = "Introduction.jpg"
-    if os.path.exists(intro_image_path):
-        st.image(intro_image_path, width=800)
-    else:
-        st.warning("🚨 L'image d'intro n'a pas été trouvée.")
+    intro_image_path = "https://raw.githubusercontent.com/AkiraInsight/-STOCKWATCH-/main/Introduction.jpg"
+    st.image(intro_image_path, width=800)
 
     st.markdown("""
         <div style='text-align: justify; font-size: 16px;'>
@@ -210,14 +207,13 @@ elif page == pages[2]:
     
     st.markdown("----")
     # Image d'illustration
-    if os.path.exists("Data Viz.jpg"):
-        st.image("Data Viz.jpg", width=800)
-        
-        st.markdown("### 📈 Cours de clôture moyen")
-        st.markdown("""
-        Le graphique ci-dessous montre l’évolution moyenne des cours de clôture pour chaque entreprise IA. 
-        Cela permet de repérer les tendances et comparer les dynamiques de marché.
-        """)
+    st.image("https://raw.githubusercontent.com/AkiraInsight/-STOCKWATCH-/main/Data%20Viz.jpg", width=800)
+    
+    st.markdown("### 📈 Cours de clôture moyen")
+    st.markdown("""
+    Le graphique ci-dessous montre l’évolution moyenne des cours de clôture pour chaque entreprise IA. 
+    Cela permet de repérer les tendances et comparer les dynamiques de marché.
+    """)
     
     df = pd.read_csv("https://raw.githubusercontent.com/AkiraInsight/-STOCKWATCH-/main/stockchange_ai_1y.csv")
     df['Date'] = pd.to_datetime(df['Date'])
@@ -293,11 +289,8 @@ elif page == pages[2]:
 
 elif page == pages[3]:
     st.markdown("## 🔧 Pré-processing des données")
-    intro_image_path = "Pre-Processing.jpg"
-    if os.path.exists(intro_image_path):
-        st.image(intro_image_path, width=800)
-    else:
-        st.warning("🚨 L'image Pre-Processing.jpg n'a pas été trouvée.")
+    intro_image_path = "https://raw.githubusercontent.com/AkiraInsight/-STOCKWATCH-/main/Pre-Processing.jpg"
+    st.image(intro_image_path, width=800)
     
     # Affichage initial du dataset
     dataset_path = "https://raw.githubusercontent.com/AkiraInsight/-STOCKWATCH-/main/stockchange_ai_1y.csv"
@@ -422,9 +415,8 @@ elif page == pages[3]:
 # --- Page Modélisation / Machine Learning ---
 elif page == pages[4]:
     st.markdown("## 🤖 Modélisation / Machine Learning ⚙️")
-    intro_image_path = "Machine Learning.jpg"
-    if os.path.exists(intro_image_path):
-        st.image(intro_image_path, width=800)
+    intro_image_path = "https://raw.githubusercontent.com/AkiraInsight/-STOCKWATCH-/main/Machine%20Learning.jpg"
+    st.image(intro_image_path, width=800)
 
     if st.button("🔄 Actualiser les données et réentraîner le modèle"):
         csv_url = "https://raw.githubusercontent.com/AkiraInsight/-STOCKWATCH-/main/stockchange_ai_1y.csv"
@@ -517,6 +509,9 @@ elif page == pages[4]:
         joblib.dump(df, "df.joblib")
         joblib.dump(model, "model.joblib")
         joblib.dump(scaler, "scaler.joblib")
+        upload_to_github("df.joblib", "AkiraInsight/-STOCKWATCH-", "df.joblib", token)
+        upload_to_github("model.joblib", "AkiraInsight/-STOCKWATCH-", "model.joblib", token)
+        upload_to_github("scaler.joblib", "AkiraInsight/-STOCKWATCH-", "scaler.joblib", token)
 
         # ✅ Upload automatique des modèles vers GitHub si token et repo configurés
         import base64
@@ -564,11 +559,8 @@ elif page == pages[4]:
 
 elif page == pages[5]:
     st.markdown("## 🎬 Application – Conseils d'achat/vente")
-    intro_image_path = "Application.jpg"
-    if os.path.exists(intro_image_path):
-        st.image(intro_image_path, width=800)
-    else:
-        st.warning("🚨 L'image Application.jpg n'a pas été trouvée.")
+    intro_image_path = "https://raw.githubusercontent.com/AkiraInsight/-STOCKWATCH-/main/Application.jpg"
+    st.image(intro_image_path, width=800)
     
     st.markdown("""
     Cette section vous permet d’obtenir une recommandation (Acheter / Attendre / Vendre) pour chaque entreprise analysée, basée sur la prédiction du modèle.
@@ -712,3 +704,4 @@ elif page == pages[5]:
     last_data["Conseil"] = reco
 
     st.dataframe(last_data[["Company", "Ticker", "Prix Réel", "Prix Prédit", "Conseil"]])
+
