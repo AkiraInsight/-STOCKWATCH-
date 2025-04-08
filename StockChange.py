@@ -531,7 +531,7 @@ elif page == pages[4]:
         y_pred = model.predict(X_test)
 
         # 👉 Sauvegarde du modèle et du scaler
-        token = "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"
+        token = st.secrets["GITHUB_TOKEN"]
         joblib.dump(df, "df.joblib")
         joblib.dump(model, "model.joblib")
         joblib.dump(scaler, "scaler.joblib")
@@ -541,7 +541,7 @@ elif page == pages[4]:
 
         # ✅ Upload automatique des modèles vers GitHub si token et repo configurés
 
-        token = "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"
+        token = st.secrets["GITHUB_TOKEN"]
         if token:
             github_repo = "AkiraInsight/-STOCKWATCH-"
             upload_to_github("model.joblib", github_repo, "model.joblib", token)
