@@ -2,6 +2,8 @@
 
 Suivi et prédiction boursière en temps réel sur les entreprises de l’intelligence artificielle.
 
+Streamlit : https://stockchange.streamlit.app
+
 🧠 Résumé du projet
 
 StockChange est une application interactive développée avec Streamlit, permettant de :
